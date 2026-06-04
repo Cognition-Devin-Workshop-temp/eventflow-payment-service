@@ -10,6 +10,7 @@ from azure.servicebus.exceptions import ServiceBusError
 
 from app.config import settings
 from app.models import OrderCreatedEvent, PaymentRecord
+from app.notifier import send_failure_email
 from app.processor import process_order_payment
 
 logger = logging.getLogger(__name__)
@@ -74,20 +75,31 @@ def _process_message(message_body: str) -> None:
 
     except json.JSONDecodeError:
         logger.exception("Failed to parse message body as JSON")
-    except ValueError:
+    except ValueError as e:
         # This is the unhandled exception path for JPY orders
         # The ValueError from validate_payment_amount propagates up uncaught
-        logger.exception(
-            "Payment processing failed — unhandled validation error"
-        )
+        logger.exception("Payment processing failed — unhandled validation error")
         # Try to update order status to failed before re-raising
         try:
             _update_order_status(event.data.order_id, "failed")
         except Exception:
             logger.warning("Could not update order status to failed")
+        try:
+            send_failure_email(event.data.order_id, str(e))
+        except Exception:
+            logger.warning("Could not send failure email")
         raise
-    except Exception:
+    except Exception as e:
         logger.exception("Unexpected error processing message")
+        order_id = "unknown"
+        if "event" in locals():
+            order_id = event.data.order_id
+        elif "event_dict" in locals() and isinstance(event_dict, dict):
+            order_id = event_dict.get("data", {}).get("order_id", "unknown")
+        try:
+            send_failure_email(order_id, str(e))
+        except Exception:
+            logger.warning("Could not send failure email")
         raise
 
 
@@ -124,9 +136,7 @@ def _consumer_loop() -> None:
                                 _process_message(body)
                                 receiver.complete_message(message)
                             except Exception:
-                                logger.exception(
-                                    "Failed to process message — abandoning"
-                                )
+                                logger.exception("Failed to process message — abandoning")
                                 receiver.abandon_message(message)
 
         except ServiceBusError:
