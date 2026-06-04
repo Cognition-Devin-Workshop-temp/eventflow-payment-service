@@ -81,6 +81,46 @@ poetry run pytest -v
 | `GET` | `/api/payments` | List processed payments |
 | `GET` | `/api/payments/{payment_id}` | Get payment by ID |
 
+## Account Tokenization
+
+The service includes endpoints for tokenizing bank accounts so that sensitive
+account/routing numbers are never stored in the clear after initial submission.
+
+### Tokenization Flow
+
+1. **Enter account & routing number** in the Angular frontend form.
+2. The backend hashes the pair (SHA-256), stores a masked record, and returns a
+   `token_id`.
+3. **Saved tokens** are listed per customer — select one to use as a payment
+   method.
+
+### Running the Backend
+
+```bash
+cp .env.example .env
+# Edit .env with dummy or real Azure credentials
+poetry run uvicorn app.main:app --reload --port 8000
+```
+
+### Running the Angular Frontend
+
+```bash
+cd payment-token-app
+npm install
+npx ng serve --proxy-config proxy.conf.json --port 4200
+```
+
+The proxy forwards `/api/*` requests to the FastAPI backend at
+`http://localhost:8000`.
+
+### Token API Endpoints
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/api/tokens` | Tokenize a bank account |
+| `GET` | `/api/tokens?customer_id=...` | List tokens for a customer |
+| `GET` | `/api/tokens/{token_id}` | Get a specific token |
+
 ## Docker
 
 ```bash

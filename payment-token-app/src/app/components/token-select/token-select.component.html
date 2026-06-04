@@ -1,0 +1,14 @@
+@if (token) {
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Selected Payment Method</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <p><strong>Token ID:</strong> {{ token.token_id }}</p>
+      <p><strong>Account:</strong> {{ token.masked_account }}</p>
+      <p><strong>Routing:</strong> {{ token.masked_routing }}</p>
+      <p><strong>Customer:</strong> {{ token.customer_id }}</p>
+      <p class="confirm-text">This token will be used for your next payment.</p>
+    </mat-card-content>
+  </mat-card>
+}
