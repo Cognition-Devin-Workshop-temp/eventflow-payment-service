@@ -4,7 +4,7 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
@@ -15,6 +15,12 @@ from app.consumer import (
     stop_consumer,
 )
 from app.models import PaymentRecord
+from app.token_models import TokenizedAccount, TokenizeRequest
+from app.token_service import (
+    create_tokenized_account,
+    get_token_by_id,
+    get_tokens_for_customer,
+)
 
 # Configure structured logging
 logging.basicConfig(
@@ -84,8 +90,6 @@ async def list_payments(limit: int = 50) -> list[PaymentRecord]:
 @app.get("/api/payments/{payment_id}", tags=["payments"], response_model=PaymentRecord)
 async def get_payment(payment_id: str) -> PaymentRecord:
     """Get a payment record by ID."""
-    from fastapi import HTTPException, status
-
     record = payments.get(payment_id)
     if record is None:
         raise HTTPException(
@@ -93,3 +97,30 @@ async def get_payment(payment_id: str) -> PaymentRecord:
             detail=f"Payment {payment_id} not found",
         )
     return record
+
+
+# ── Token endpoints ──────────────────────────────────────────────────────────
+
+
+@app.post("/api/tokens", tags=["tokens"], response_model=TokenizedAccount)
+async def tokenize_account(request: TokenizeRequest) -> TokenizedAccount:
+    """Tokenize a bank account."""
+    return create_tokenized_account(request)
+
+
+@app.get("/api/tokens", tags=["tokens"], response_model=list[TokenizedAccount])
+async def list_tokens(customer_id: str) -> list[TokenizedAccount]:
+    """List tokens for a customer."""
+    return get_tokens_for_customer(customer_id)
+
+
+@app.get("/api/tokens/{token_id}", tags=["tokens"], response_model=TokenizedAccount)
+async def get_token(token_id: str) -> TokenizedAccount:
+    """Get a specific token by ID."""
+    token = get_token_by_id(token_id)
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Token {token_id} not found",
+        )
+    return token

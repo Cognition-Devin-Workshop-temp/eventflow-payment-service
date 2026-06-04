@@ -1,0 +1,23 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>payment</mat-icon> Selected Payment Method
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    @if (!selectedToken) {
+      <p class="placeholder">No payment method selected. Choose a token from the list above.</p>
+    } @else {
+      <div class="selected-details">
+        <p><strong>Token ID:</strong> {{ selectedToken.token_id }}</p>
+        <p><strong>Account:</strong> {{ selectedToken.masked_account }}</p>
+        <p><strong>Routing:</strong> {{ selectedToken.masked_routing }}</p>
+        <p><strong>Customer:</strong> {{ selectedToken.customer_id }}</p>
+        <p class="confirm-message">
+          <mat-icon color="primary">verified</mat-icon>
+          This token will be used for the next payment.
+        </p>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

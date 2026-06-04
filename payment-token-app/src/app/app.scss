@@ -1,0 +1,26 @@
+.app-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.app-title {
+  text-align: center;
+  margin-bottom: 24px;
+  color: #1976d2;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.select-section {
+  margin-top: 8px;
+}

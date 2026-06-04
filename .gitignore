@@ -35,6 +35,11 @@ poetry.lock
 # Docker
 .docker/
 
+# Angular
+payment-token-app/node_modules/
+payment-token-app/dist/
+payment-token-app/.angular/
+
 # OS
 .DS_Store
 Thumbs.db
