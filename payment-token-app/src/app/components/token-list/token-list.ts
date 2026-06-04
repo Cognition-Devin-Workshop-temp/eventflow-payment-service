@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -21,9 +21,12 @@ export class TokenListComponent implements OnChanges {
   tokens: TokenizedAccount[] = [];
   displayedColumns = ['token_id', 'masked_account', 'masked_routing', 'created_at', 'is_active', 'actions'];
 
-  constructor(private tokenService: TokenService) {}
+  constructor(
+    private tokenService: TokenService,
+    private cdr: ChangeDetectorRef,
+  ) {}
 
-  ngOnChanges(changes: SimpleChanges): void {
+  ngOnChanges(): void {
     if (this.customerId) {
       this.loadTokens();
     }
@@ -31,8 +34,14 @@ export class TokenListComponent implements OnChanges {
 
   loadTokens(): void {
     this.tokenService.getTokens(this.customerId).subscribe({
-      next: (tokens) => (this.tokens = tokens),
-      error: () => (this.tokens = []),
+      next: (tokens) => {
+        this.tokens = tokens;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.tokens = [];
+        this.cdr.detectChanges();
+      },
     });
   }
 
