@@ -80,6 +80,45 @@ poetry run pytest -v
 | `GET` | `/ready` | Readiness check |
 | `GET` | `/api/payments` | List processed payments |
 | `GET` | `/api/payments/{payment_id}` | Get payment by ID |
+| `POST` | `/api/tokens` | Tokenize a bank account |
+| `GET` | `/api/tokens?customer_id=...` | List tokens for a customer |
+| `GET` | `/api/tokens/{token_id}` | Get a specific token |
+
+## Account Tokenization
+
+The service includes a tokenization layer that converts sensitive bank account/routing numbers into opaque tokens. Raw numbers are never stored — only masked versions (last 4 digits) and the SHA-256-derived token.
+
+### Flow
+
+1. Client POSTs `account_number`, `routing_number`, `customer_id` to `/api/tokens`
+2. Service generates a deterministic `tok_`-prefixed token from the SHA-256 of the account+routing pair
+3. Only masked values (`****1234`) and the token are persisted (in-memory)
+4. Duplicate tokenization of the same account+routing is detected and returns the existing token
+
+### Validation Rules
+
+- Account number: 8–17 digits, numeric only
+- Routing number: exactly 9 digits, numeric only
+
+## Angular Frontend (`payment-token-app/`)
+
+An Angular 19 + Material application that provides a UI for tokenizing accounts and managing saved payment methods.
+
+### Running the Frontend
+
+```bash
+cd payment-token-app
+npm install
+npm start
+```
+
+The Angular dev server runs on `http://localhost:4200` and expects the FastAPI backend on port 8000.
+
+### Features
+
+- **Tokenize New Account** form with inline validation
+- **My Saved Payment Methods** table with token list per customer
+- **Selected Payment Method** display confirming the token to use for a transaction
 
 ## Docker
 
