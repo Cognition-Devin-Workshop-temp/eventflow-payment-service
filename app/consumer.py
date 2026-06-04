@@ -84,12 +84,20 @@ def _process_message(message_body: str) -> None:
             _update_order_status(event.data.order_id, "failed")
         except Exception:
             logger.warning("Could not update order status to failed")
-        send_failure_email(event.data.order_id, str(e))
+        try:
+            send_failure_email(event.data.order_id, str(e))
+        except Exception:
+            logger.warning("Could not send failure email")
         raise
     except Exception as e:
         logger.exception("Unexpected error processing message")
+        order_id = "unknown"
+        if "event" in locals():
+            order_id = event.data.order_id
+        elif "event_dict" in locals() and isinstance(event_dict, dict):
+            order_id = event_dict.get("data", {}).get("order_id", "unknown")
         try:
-            send_failure_email(event.data.order_id, str(e))
+            send_failure_email(order_id, str(e))
         except Exception:
             logger.warning("Could not send failure email")
         raise
