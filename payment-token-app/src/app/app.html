@@ -1,0 +1,21 @@
+<div class="app-container">
+  <h1 class="app-title">Payment Token Manager</h1>
+
+  <div class="layout">
+    <div class="form-section">
+      <app-token-form (tokenCreated)="onTokenCreated($event)"></app-token-form>
+    </div>
+
+    <div class="list-section">
+      <app-token-list
+        [customerId]="customerId"
+        [refreshTrigger]="refreshTrigger"
+        (tokenSelected)="onTokenSelected($event)"
+      ></app-token-list>
+    </div>
+  </div>
+
+  <div class="select-section">
+    <app-token-select [selectedToken]="selectedToken"></app-token-select>
+  </div>
+</div>

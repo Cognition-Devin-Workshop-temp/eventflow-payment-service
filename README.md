@@ -45,6 +45,7 @@ This bug is intentionally present on the `main` branch to demonstrate:
 - Azure Service Bus SDK
 - OpenTelemetry + Azure Monitor
 - Pydantic v2
+- Angular 19 + Angular Material (frontend)
 
 ## Local Development
 
@@ -80,6 +81,41 @@ poetry run pytest -v
 | `GET` | `/ready` | Readiness check |
 | `GET` | `/api/payments` | List processed payments |
 | `GET` | `/api/payments/{payment_id}` | Get payment by ID |
+| `POST` | `/api/tokens` | Tokenize a bank account |
+| `GET` | `/api/tokens?customer_id=...` | List tokens for a customer |
+| `GET` | `/api/tokens/{token_id}` | Get a specific token |
+
+## Account Tokenization
+
+The service includes an account tokenization feature that lets you store masked bank account references instead of raw account numbers.
+
+### Tokenization Flow
+
+1. **Tokenize** — `POST /api/tokens` with `account_number`, `routing_number`, and `customer_id`. Returns a `TokenizedAccount` with masked values and a UUID `token_id`.
+2. **List** — `GET /api/tokens?customer_id=CUST-001` to retrieve all tokens for a customer.
+3. **Lookup** — `GET /api/tokens/{token_id}` to get details for a single token.
+
+Tokens are stored in-memory (lost on restart). Duplicate account+routing pairs return the existing token.
+
+## Angular Frontend
+
+A standalone Angular application (`payment-token-app/`) provides a UI for the tokenization endpoints.
+
+### Running Both Services
+
+```bash
+# Terminal 1 — Backend
+cp .env.example .env
+poetry install
+poetry run uvicorn app.main:app --reload --port 8000
+
+# Terminal 2 — Frontend
+cd payment-token-app
+npm install
+npm start -- --proxy-config proxy.conf.json --port 4200
+```
+
+Open http://localhost:4200 in your browser. The Angular dev server proxies `/api` requests to the FastAPI backend on port 8000.
 
 ## Docker
 

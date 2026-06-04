@@ -1,0 +1,38 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Tokenize Bank Account</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="token-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Account Number</mat-label>
+        <input matInput formControlName="account_number" placeholder="8-17 digits" />
+        @if (form.get('account_number')?.hasError('pattern')) {
+          <mat-error>Must be 8-17 digits</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Routing Number</mat-label>
+        <input matInput formControlName="routing_number" placeholder="9 digits" />
+        @if (form.get('routing_number')?.hasError('pattern')) {
+          <mat-error>Must be exactly 9 digits</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Customer ID</mat-label>
+        <input matInput formControlName="customer_id" placeholder="e.g. CUST-001" />
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="form.invalid || submitting"
+      >
+        {{ submitting ? 'Tokenizing...' : 'Tokenize Account' }}
+      </button>
+    </form>
+  </mat-card-content>
+</mat-card>

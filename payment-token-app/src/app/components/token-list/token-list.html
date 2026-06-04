@@ -1,0 +1,53 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Tokenized Accounts</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    @if (tokens.length === 0) {
+      <p class="empty-message">No tokenized accounts found. Tokenize an account to get started.</p>
+    } @else {
+      <table mat-table [dataSource]="tokens" class="full-width">
+        <ng-container matColumnDef="token_id">
+          <th mat-header-cell *matHeaderCellDef>Token ID</th>
+          <td mat-cell *matCellDef="let t">{{ t.token_id | slice:0:8 }}…</td>
+        </ng-container>
+
+        <ng-container matColumnDef="masked_account">
+          <th mat-header-cell *matHeaderCellDef>Account</th>
+          <td mat-cell *matCellDef="let t">{{ t.masked_account }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="masked_routing">
+          <th mat-header-cell *matHeaderCellDef>Routing</th>
+          <td mat-cell *matCellDef="let t">{{ t.masked_routing }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="created_at">
+          <th mat-header-cell *matHeaderCellDef>Created</th>
+          <td mat-cell *matCellDef="let t">{{ t.created_at | date:'short' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="is_active">
+          <th mat-header-cell *matHeaderCellDef>Active</th>
+          <td mat-cell *matCellDef="let t">
+            <mat-icon [color]="t.is_active ? 'primary' : 'warn'">
+              {{ t.is_active ? 'check_circle' : 'cancel' }}
+            </mat-icon>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let t">
+            <button mat-stroked-button color="primary" (click)="selectToken(t)">
+              Use This Token
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    }
+  </mat-card-content>
+</mat-card>
