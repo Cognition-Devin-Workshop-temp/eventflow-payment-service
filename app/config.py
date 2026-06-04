@@ -16,6 +16,15 @@ class Settings(BaseSettings):
     # Order service callback
     order_service_url: str = ""
 
+    # Email notification (SMTP)
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_use_tls: bool = True
+    notification_sender_email: str = ""
+    notification_recipient_email: str = ""
+
     # Application
     log_level: str = "INFO"
     environment: str = "development"
