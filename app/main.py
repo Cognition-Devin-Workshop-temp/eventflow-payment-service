@@ -4,9 +4,10 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.auth import get_current_user
 from app.config import settings
 from app.consumer import (
     check_servicebus_health,
@@ -15,6 +16,7 @@ from app.consumer import (
     stop_consumer,
 )
 from app.models import PaymentRecord
+from app.routes.auth import router as auth_router
 
 # Configure structured logging
 logging.basicConfig(
@@ -46,6 +48,8 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.include_router(auth_router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -74,7 +78,9 @@ async def readiness_check() -> dict[str, str | bool]:
 
 
 @app.get("/api/payments", tags=["payments"], response_model=list[PaymentRecord])
-async def list_payments(limit: int = 50) -> list[PaymentRecord]:
+async def list_payments(
+    limit: int = 50, _current_user: str = Depends(get_current_user)
+) -> list[PaymentRecord]:
     """List processed payments."""
     records = list(payments.values())
     records.sort(key=lambda p: p.processed_at, reverse=True)
@@ -82,7 +88,9 @@ async def list_payments(limit: int = 50) -> list[PaymentRecord]:
 
 
 @app.get("/api/payments/{payment_id}", tags=["payments"], response_model=PaymentRecord)
-async def get_payment(payment_id: str) -> PaymentRecord:
+async def get_payment(
+    payment_id: str, _current_user: str = Depends(get_current_user)
+) -> PaymentRecord:
     """Get a payment record by ID."""
     from fastapi import HTTPException, status
 
