@@ -5,6 +5,7 @@ The JPY/KRW zero-decimal currency bug is NOT covered by these tests,
 which is why it passes CI but fails in production.
 """
 
+from app.auth import create_access_token
 from app.models import OrderEventData, PaymentStatus
 from app.processor import convert_to_display_amount, process_order_payment
 
@@ -85,7 +86,8 @@ class TestHealthEndpoints:
         assert response.json()["status"] == "degraded"
 
     def test_list_payments_empty(self, client):
-        """Payments list should return empty list initially."""
-        response = client.get("/api/payments")
+        """Payments list should return empty list initially (with valid token)."""
+        token = create_access_token(data={"sub": "admin"})
+        response = client.get("/api/payments", headers={"Authorization": f"Bearer {token}"})
         assert response.status_code == 200
         assert isinstance(response.json(), list)

@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     # Order service callback
     order_service_url: str = ""
 
+    # JWT Authentication
+    jwt_secret_key: str = "change-me-in-production"
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 30
+
     # Application
     log_level: str = "INFO"
     environment: str = "development"
